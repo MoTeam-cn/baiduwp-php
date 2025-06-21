@@ -55,7 +55,7 @@ class Install extends BaseController
         if ($driver == 'mysql') {
             $dsn = "mysql:host=$host;charset=utf8mb4";
         } else {
-            $name = './../' . $name;
+            $name = '.' . DIRECTORY_SEPARATOR . $name;
             $dsn = "sqlite:$name";
         }
         try {
@@ -85,7 +85,7 @@ class Install extends BaseController
         $user = $request->post('user', '');
         $pass = $request->post('pass', '');
         if ($driver == 'sqlite') {
-            $name = './../' . $name;
+            $name = '.' . DIRECTORY_SEPARATOR . $name;
         }
 
         $env = <<<EOF
@@ -104,18 +104,15 @@ DB_CHARSET = utf8
 
 DEFAULT_LANG = zh-cn
 EOF;
-        file_put_contents('./../.env', $env);
+        $envPath = '.' . DIRECTORY_SEPARATOR . '.env';
+        file_put_contents($envPath, $env);
         if ($USING_DB == 'true') {
             try {
                 // 动态配置数据库
                 $origin = Config::get('database');
                 $origin['connections']['install'] = [
                     'type' => $driver,
-                    // 'hostname' => $host,
                     'database' => $name,
-                    // 'username' => $user,
-                    // 'password' => $pass,
-                    // 'hostport' => '3306',
                     'charset' => 'utf8mb4',
                     'prefix' => '',
                     'debug' => true,
@@ -133,7 +130,7 @@ EOF;
                 $this->initDb($driver);
             } catch (Exception $e) {
                 // 删除.env文件
-                unlink('./../.env');
+                unlink($envPath);
                 return json([
                     'error' => -1,
                     'msg' => '数据库初始化失败',
@@ -142,11 +139,21 @@ EOF;
             }
         }
 
-        Setting::updateConfig([
+        $result = Setting::updateConfig([
             'db' => $USING_DB == 'true' ? true : false,
-            'program_version' => Index::$version,
+            'program_version' => \app\controller\Index::$version,
             'admin_password' => $ADMIN_PASSWORD,
+            'site_name' => 'PanDownload',
         ], true);
+
+        if (!$result) {
+            // 删除.env文件
+            unlink($envPath);
+            return json([
+                'error' => -1,
+                'msg' => '配置文件写入失败',
+            ]);
+        }
 
         return json([
             'error' => 0,

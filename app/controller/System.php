@@ -15,7 +15,8 @@ class System extends BaseController
     public function index()
     {
         // 先检查是否安装
-        if (!file_exists('./../.env')) {
+        $envPath = '.' . DIRECTORY_SEPARATOR . '.env';
+        if (!file_exists($envPath)) {
             return json([
                 'error' => 114514,
                 'msg' => '未安装',

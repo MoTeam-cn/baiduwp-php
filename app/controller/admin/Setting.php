@@ -106,6 +106,17 @@ class Setting extends BaseController
 // 本文件由程序自动生成，请勿随意修改，以免失效！
 return {$config};
 PHP;
-        file_put_contents('../config/baiduwp.php', $config);
+        try {
+            $configPath = '.' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'baiduwp.php';
+            if (!is_dir(dirname($configPath))) {
+                mkdir(dirname($configPath), 0755, true);
+            }
+            if (file_put_contents($configPath, $config) === false) {
+                throw new \Exception('无法写入配置文件');
+            }
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
