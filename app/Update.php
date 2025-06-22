@@ -13,14 +13,14 @@ class Update
         );
         if ($includePreRelease) { // 若包括 Pre-Release
             $info[] = "Include-PreRelease";
-            $result = Req::GET('https://api.github.com/repos/yuantuo666/baiduwp-php/releases', $header);
+            $result = Req::GET('https://api.github.com/repos/MoTeam-cn/baiduwp-php/releases', $header);
             if ($result) {
                 $result = json_decode($result, true);
                 return $result[0] ?? false; // 返回首个结果
             }
             $info[] = "API-Download-Newest-Error";
         } else { // 若不包括
-            $result = Req::GET('https://api.github.com/repos/yuantuo666/baiduwp-php/releases/latest', $header);
+            $result = Req::GET('https://api.github.com/repos/MoTeam-cn/baiduwp-php/releases/latest', $header);
             if ($result) {
                 return json_decode($result, true);
             }

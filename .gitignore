@@ -13,3 +13,6 @@ Thumbs.db
 public/update.json
 bdwp.db
 config/baiduwp.php
+
+*.mdc
+/.cursor

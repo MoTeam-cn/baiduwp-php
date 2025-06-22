@@ -8,13 +8,29 @@
  *
  */
 const ROOT_PATH = window.location.pathname.slice(0,-1); // 获取网站根目录
+let defaultUA = "netdisk;18.0.0.12;PC;bdwp";
+
 addEventListener('DOMContentLoaded', function () {
 	window.downloadpage = new bootstrap.Modal('#downloadpage', {
 		keyboard: false,
 		backdrop: 'static'
 	});
 
+	// 获取系统UA并更新help页面
+	getAPI('/system').then(function (response) {
+		if (response.success) {
+			const data = response.data;
+			if (data.error === 0) {
+				defaultUA = data.user_agent || defaultUA;
+				// 更新help页面的UA显示
+				$("#helpmsg_ua").text(defaultUA);
+				$("#helpmsg_ua2").text(defaultUA);
+				$("#helpmsg_ua3").text(defaultUA);
+			}
+		}
+	});
 });
+
 function http_build_query(params, numeric_prefix, arg_separator) {
 	let value, key, tmp = [];
 	const _http_build_query_helper = (key, val, arg_separator) => {
@@ -308,7 +324,7 @@ async function OpenRoot(surl, pwd, password = "") {
 			pwd,
 			password
 		}
-		await fetch(`${ROOT_PATH}/parse/list`, { // fetch API
+		await fetch(`${ROOT_PATH}/parse/list`, {
 			credentials: 'same-origin',
 			method: 'POST',
 			body: http_build_query(data),
@@ -330,9 +346,7 @@ async function OpenRoot(surl, pwd, password = "") {
 					Swal.fire(json.title || "获取文件列表失败", json.msg, "error");
 					navigate('index');
 				}
-
 			});
-
 	} catch (reason) {
 		Swal.fire("获取文件列表失败", "连接服务器过程中出现异常，消息：" + reason.message, "error");
 		navigate('index');
@@ -352,9 +366,10 @@ async function OpenDir(path) {
 	try {
 		data = {
 			dir: path,
-			...files.dirdata
+			surl: files.dirdata.surl,
+			pwd: files.dirdata.pwd
 		}
-		await fetch(`${ROOT_PATH}/parse/list`, { // fetch API
+		await fetch(`${ROOT_PATH}/parse/list`, {
 			credentials: 'same-origin',
 			method: 'POST',
 			body: http_build_query(data),
@@ -375,9 +390,7 @@ async function OpenDir(path) {
 					// fail
 					Swal.fire(json.title || "获取文件列表失败", json.msg, "error");
 				}
-
 			});
-
 	} catch (reason) {
 		Swal.fire("获取文件列表失败", "连接服务器过程中出现异常，消息：" + reason.message, "error");
 	}
@@ -444,6 +457,10 @@ function LoadList(json) {
 		}
 	});
 }
+function generateSign(dlink, fs_id, size) {
+	return md5(`${dlink}${fs_id}${size}`);
+}
+
 async function Download(index = 0) {
 	Swal.fire({
 		title: "正在获取下载链接",
@@ -456,13 +473,22 @@ async function Download(index = 0) {
 	let files = window.files;
 	let downloadfile = files.filedata[index];
 
+	const sign = generateSign(downloadfile.dlink, downloadfile.fs_id, downloadfile.size);
+
 	let data = {
 		fs_id: downloadfile.fs_id,
-		...files.dirdata
+		randsk: files.dirdata.randsk,
+		shareid: files.dirdata.shareid,
+		uk: files.dirdata.uk,
+		name: downloadfile.name,
+		size: downloadfile.size,
+		md5: downloadfile.md5,
+		dlink: downloadfile.dlink,
+		sign: sign
 	}
 
 	try {
-		await fetch(`${ROOT_PATH}/parse/link`, { // fetch API
+		await fetch(`${ROOT_PATH}/parse/link`, {
 			credentials: 'same-origin',
 			method: 'POST',
 			body: http_build_query(data),
@@ -483,59 +509,54 @@ async function Download(index = 0) {
 				Size = formatBytes(json.filedata.size);
 				Time = formatDate(json.filedata.uploadtime, 'YY/MM/DD hh:mm:ss');
 
-				html = `<div class="list-group">
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">文件名称</label>
-                <div class="col-sm-9">
-                    <b id="filename">${json.filedata.filename}</b>
-                </div>
-            </div>
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">文件大小</label>
-                <div class="col-sm-9">
-                    <b>${Size}</b>
-                </div>
-            </div>
-			<div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">MD5</label>
-                <div class="col-sm-9">
-                    <b>${json.filedata.md5}</b>
-                </div>
-            </div>
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">上传时间</label>
-                <div class="col-sm-9">
-                    <b>${Time}</b>
-                </div>
-            </div>
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">User-Agent</label>
-                <div class="col-sm-9">
-                    <b id="ua">${json.user_agent}</b>
-                </div>
-            </div>`
-				if (json.filedata.size <= 52428800) {
-					html = html + `
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">下载地址</label>
-                <div class="col-sm-9 input-group">
-                    <input class="form-control" id="downloadlink" aria-describedby="copy" value="${json.directlink}"/>
-                    <a type="button" class="btn btn-outline-secondary" id="copy" href="${json.directlink}" target="_blank"><i class="fas fa-download"></i></a>
-                </div>
-            </div>
-        </div>`;
-				} else {
-					html = html + `
-            <div class="mb-3 row">
-                <label class="col-sm-3 col-form-label">下载地址</label>
-                <div class="col-sm-9 input-group">
-                    <input class="form-control" id="downloadlink" aria-describedby="copy" value="${json.directlink}"/>
-                    <button type="button" class="btn btn-outline-secondary" id="copy" onclick="CopyDownloadLink()"><i class="fas fa-copy"></i></button>
-                </div>
-            </div>
-        </div>`;
-				}
+				html = `
+                    <div class="row mb-3">
+                        <label class="col-3">文件名称</label>
+                        <div class="col-9">
+                            <b id="filename">${json.filedata.filename}</b>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-3">文件大小</label>
+                        <div class="col-9">
+                            <b>${Size}</b>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-3">MD5</label>
+                        <div class="col-9">
+                            <b>${json.filedata.md5}</b>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-3">User-Agent</label>
+                        <div class="col-9">
+                            <b id="ua">${json.user_agent}</b>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-3">解析时间</label>
+                        <div class="col-9">
+                            <b>${json.parse_time}</b>
+                            ${json.is_cached ? `<br><small class="text-muted">缓存于 ${json.cache_time}<br>过期时间 ${json.expires_at}</small>` : ''}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-3">下载地址</label>
+                        <div class="col-9">
+                            <div class="input-group">
+                                <input class="form-control" id="downloadlink" aria-describedby="copy" value="${json.directlink}"/>
+                                <button type="button" class="btn btn-outline-secondary" onclick="CopyDownloadLink()"><i class="fas fa-copy"></i></button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="ChangeDownloadLink()"><i class="fas fa-random"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    ${json.is_cached ? '<div class="alert alert-success" role="alert"><i class="fas fa-check-circle"></i> 此链接从缓存获取</div>' : ''}
+                `;
 				$("#downloadlinkdiv").html(html);
+				// 保存所有可用链接到全局变量
+				window.available_links = json.urls || [];
+				window.current_link_index = 0;
 				if (json.directlink.indexOf("//qdall01") !== -1) {
 					$("#limit-tip").show();
 				} else {
@@ -564,6 +585,57 @@ async function Download(index = 0) {
 		Swal.fire("获取下载链接失败", reason.message, "error");
 	}
 
+}
+function ChangeDownloadLink() {
+	if (!window.available_links || window.available_links.length <= 1) {
+		Swal.fire({
+			title: "无可用链接",
+			html: "没有其他可用的下载链接",
+			icon: "info"
+		});
+		return;
+	}
+
+	// 循环切换到下一个链接
+	window.current_link_index = (window.current_link_index + 1) % window.available_links.length;
+	let new_link = window.available_links[window.current_link_index];
+	
+	// 更新输入框中的链接
+	$("#downloadlink").val(new_link);
+	
+	// 更新复制/下载按钮的href
+	if ($("#copy").attr("href")) {
+		$("#copy").attr("href", new_link);
+	}
+
+	// 更新文件蜈蚣链接
+	try {
+		let filec_address = create_fileu_address({
+			uri: new_link,
+			user_agent: $("#ua").text(),
+			file_name: $("#filename").text()
+		});
+		$("#filecxx").attr("href", filec_address);
+		$("#filecxx").show();
+	} catch (e) {
+		$("#filecxx").hide();
+	}
+
+	// 检查是否是限速链接
+	if (new_link.indexOf("//qdall01") !== -1) {
+		$("#limit-tip").show();
+	} else {
+		$("#limit-tip").hide();
+	}
+
+	Swal.fire({
+		title: "已切换下载链接",
+		html: `已切换到第 ${window.current_link_index + 1}/${window.available_links.length} 个链接`,
+		icon: "success",
+		timer: 1500,
+		timerProgressBar: true,
+		showConfirmButton: false
+	});
 }
 function CopyDownloadLink() {
 	const Success = () => {

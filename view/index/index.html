@@ -21,6 +21,7 @@
     <link rel="stylesheet" disabled id="Swal2-Light"
         href="https://fastly.jsdelivr.net/npm/@sweetalert2/theme-default@4.0.2/default.min.css" />
     <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/blueimp-md5/2.19.0/js/md5.min.js"></script>
     <script src="https://cdn.staticfile.org/bootstrap/5.3.0-alpha2/js/bootstrap.bundle.min.js"></script>
     <script src="https://fastly.jsdelivr.net/npm/sweetalert2@10.14.0/dist/sweetalert2.min.js"></script>
     <script src="https://fastly.jsdelivr.net/npm/@keeex/qrcodejs-kx"></script>
@@ -396,7 +397,7 @@
                                         对应版本</li>
                                     <li>安装后运行Motrix。</li>
                                     <li>打开解析下载页面，点击 <b>推送到 Aria2(Motrix)</b></li>
-                                    <li>在“RPC地址”中输入 <b>ws://localhost:16800/jsonrpc</b> 并 点击发送。</li>
+                                    <li>在"RPC地址"中输入 <b>ws://localhost:16800/jsonrpc</b> 并 点击发送。</li>
                                 </ol>
                                 <div id="aria2-windows"><a class="anchor" href="#aria2-windows"></a>
                                     <h4>Aria2（Windows）</h4>
@@ -421,7 +422,7 @@
                                     <h4>IDM</h4>
                                 </div>
                                 <ol>
-                                    <li>选项 -> 下载 -> 手动添加任务时使用的用户代理（UA）-> 填入 <b>LogStatistic</b></li>
+                                    <li>选项 -> 下载 -> 手动添加任务时使用的用户代理（UA）-> 填入 <b id="helpmsg_ua">Loading...</b></li>
                                     <li><b>右键复制下载链接</b>（如果 直接点击 或 右键调用IDM 将传入浏览器的 UA 导致下载失败），在 IDM 新建任务，粘贴链接即可下载。</li>
                                 </ol>
                                 <div id="Chrome"><a class="anchor" href="#Chrome"></a>
@@ -433,11 +434,11 @@
                                             target="_blank">User-Agent Switcher for Chrome</a></li>
                                     <li>右键点击扩展图标 -> 选项</li>
                                     <li>New User-Agent name 填入 百度网盘分享下载</li>
-                                    <li>New User-Agent String 填入 <b>LogStatistic</b></li>
+                                    <li>New User-Agent String 填入 <b id="helpmsg_ua2">Loading...</b></li>
                                     <li>Group 填入 百度网盘</li>
                                     <li>Append? 选择 Replace</li>
                                     <li>Indicator Flag 填入 Log，点击 Add 保存</li>
-                                    <li>保存后点击扩展图标，出现“百度网盘”，进入并选择“百度网盘分享下载”。</li>
+                                    <li>保存后点击扩展图标，出现"百度网盘"，进入并选择"百度网盘分享下载"。</li>
                                 </ol>
                                 <blockquote>
                                     <p>Chrome 应用商店打不开或者其他 Chromium 内核的浏览器，<a href="resource/UserAgentSwitcher.crx"
@@ -449,7 +450,7 @@
                                     <h4>Alook 浏览器（IOS）</h4>
                                 </div>
                                 <ol>
-                                    <li>设置 -> 通用设置 -> 浏览器标识 -> 移动版浏览器标识 -> 自定义 -><br />填入 <b>LogStatistic</b></li>
+                                    <li>设置 -> 通用设置 -> 浏览器标识 -> 移动版浏览器标识 -> 自定义 -><br />填入 <b id="helpmsg_ua3">Loading...</b></li>
                                 </ol>
                                 <div id="Copyright"><a class="anchor" href="#Copyright"></a>
                                     <h4>关于此项目</h4>
@@ -460,11 +461,23 @@
                                     <li>当前项目版本：
                                         <?= $program_version ?>
                                     </li>
-                                    <li><a href="https://github.com/yuantuo666/baiduwp-php" target="_blank">Github仓库</a>
-                                    </li>
-                                    <li>项目作者：<a href="https://imwcr.cn/" target="_blank">Yuan_Tuo</a></li>
-                                    <li>项目协作者：<a href="https://lcwebsite.cn/" target="_blank">LC</a></li>
                                 </ol>
+                                <div class="card mb-3">
+                                    <div class="card-header">原项目信息</div>
+                                    <div class="card-body">
+                                        <p><a href="https://github.com/yuantuo666/baiduwp-php" target="_blank">Github 项目地址</a></p>
+                                        <p>项目作者：<a href="https://imwcr.cn/" target="_blank">Yuan_Tuo</a></p>
+                                        <p>项目协作者：<a href="https://lcwebsite.cn/" target="_blank">LC</a></p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">二开信息</div>
+                                    <div class="card-body">
+                                        <p><a href="https://github.com/MoTeam-cn/baiduwp-php" target="_blank">Github 项目地址</a></p>
+                                        <p>二开作者：<a href="https://github.com/MoTeam-cn" target="_blank">MoTeam</a></p>
+                                        <p>主要改进：修复解析系统，优化界面显示，添加缓存系统，支持多链接切换</p>
+                                    </div>
+                                </div>
                             </section>
                             <script>
                                 $(".anchor").attr("target", "_self").prepend(`<svg viewBox="0 0 16 16" version="1.1" width="16" height="16"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5

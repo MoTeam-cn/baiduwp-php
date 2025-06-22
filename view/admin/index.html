@@ -114,6 +114,7 @@
                             允许下载流量：<span id="download_flow"></span> <br />
                             检查账号限速：<span id="check_limit"></span> <br />
                             随机使用账号：<span id="random_account"></span> <br />
+                            启用下载缓存：<span id="enable_cache"></span> <br />
                         </p>
                         <button onclick="navigate('setting')" class="btn btn-primary">查看详细情况</button>
                         <br><br>
@@ -152,6 +153,7 @@
                                     $("#download_flow").html(setting.download_flow + " GB");
                                     $("#check_limit").html(setting.check_speed_limit ? "是" : "否");
                                     $("#random_account").html(setting.random_account ? "是" : "否");
+                                    $("#enable_cache").html(setting.enable_cache ? "是" : "否");
                                 } else {
                                     Swal.fire("获取数据失败", json.msg, "error");
                                 }
@@ -282,7 +284,7 @@
                 <div class="form-group">
                     <label>Cookie</label>
                     <input type="text" class="form-control" name="cookie">
-                    <small>请搜索 “百度网盘如何抓包Cookie” 寻找相关教程。必须填写完整正确的 Cookie。获取完成后不要退出登录和修改密码，否则 Cookie 将会失效。</small>
+                    <small>请搜索 "百度网盘如何抓包Cookie" 寻找相关教程。必须填写完整正确的 Cookie。获取完成后不要退出登录和修改密码，否则 Cookie 将会失效。</small>
                 </div>
                 <div class="form-group">
                     <label>备注</label>

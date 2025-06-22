@@ -164,7 +164,7 @@ EOF;
     {
         $sqls = [
             "CREATE TABLE IF NOT EXISTS `records` (
-                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
                 `time` DATETIME NOT NULL,
                 `size` bigint NOT NULL,
                 `name` varchar(255) NOT NULL,
@@ -173,26 +173,26 @@ EOF;
                 `ip` varchar(255) NOT NULL,
                 `ua` varchar(255) NOT NULL,
                 `account` int NOT NULL,
-                PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+                `fs_id` varchar(255) NOT NULL,
+                `expires_at` DATETIME NOT NULL
+            )",
+            "CREATE INDEX IF NOT EXISTS `idx_fs_id` ON `records` (`fs_id`)",
             "CREATE TABLE IF NOT EXISTS `ip` (
-                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
                 `type` int(1) NOT NULL,
                 `ip` varchar(255) NOT NULL,
                 `created_at` DATETIME NOT NULL,
-                `remarks` varchar(255) NOT NULL,
-                PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+                `remarks` varchar(255) NOT NULL
+            )",
             "CREATE TABLE IF NOT EXISTS `account` (
-                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
                 `name` varchar(255) NOT NULL,
                 `cookie` TEXT NOT NULL,
                 `status` int(1) NOT NULL,
                 `created_at` DATETIME NOT NULL,
                 `last_used_at` DATETIME NOT NULL,
-                `remarks` varchar(255) NOT NULL,
-                PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+                `remarks` varchar(255) NOT NULL
+            )"
         ];
         // 启动事务
         Db::connect('install')->startTrans();

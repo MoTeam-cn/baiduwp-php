@@ -16,9 +16,7 @@ class Parse extends BaseController
         $surl = $request->post('surl', ''); // 获取surl
         $pwd = $request->post('pwd', ''); // 获取密码
         $dir = $request->post('dir', ''); // 获取目录
-        $sign = $request->post('sign', '');
-        $timestamp = $request->post('timestamp', '');
-        $result = GlobalParse::getList($surl, $pwd, $dir, $sign, $timestamp);
+        $result = GlobalParse::getList($surl, $pwd, $dir);
         return json($result);
     }
 
@@ -28,13 +26,24 @@ class Parse extends BaseController
     public function link(Request $request)
     {
         $fs_id = $request->post('fs_id', '');
-        $timestamp = $request->post('timestamp', '');
-        $sign = $request->post('sign', '');
         $randsk = $request->post('randsk', '');
         $shareid = $request->post('shareid', '');
         $uk = $request->post('uk', '');
+        $name = $request->post('name', '');
+        $size = $request->post('size', 0);
+        $md5 = $request->post('md5', '');
+        $dlink = $request->post('dlink', '');
+        $sign = $request->post('sign', '');
 
-        $result = GlobalParse::download($fs_id, $timestamp, $sign, $randsk, $shareid, $uk);
+        // 验证签名
+        if (md5($dlink . $fs_id . $size) !== $sign) {
+            return json([
+                'error' => -1,
+                'msg' => '签名验证失败'
+            ]);
+        }
+
+        $result = GlobalParse::download($fs_id, $randsk, $shareid, $uk, $name, $size, $md5, $dlink);
         return json($result);
     }
 }

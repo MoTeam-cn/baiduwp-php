@@ -110,6 +110,7 @@ class Index extends BaseController
             'download_flow' => config('baiduwp.flow'),
             'check_speed_limit' => config('baiduwp.check_speed_limit'),
             'random_account' => config('baiduwp.random_account'),
+            'enable_cache' => config('baiduwp.enable_cache', true),  // 默认开启缓存
         ];
         return json(['error' => 0, 'msg' => 'success', 'data' => [
             'records' => $records,

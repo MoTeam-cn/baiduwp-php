@@ -86,7 +86,9 @@ class System extends BaseController
             // 返回数据库中上一次解析的时间，及SVIP状态
             'account' => $account,
             // 返回数据库中所有的解析总数和文件总大小
-            'count' => $count
+            'count' => $count,
+            // 返回系统配置的user_agent
+            'user_agent' => config('baiduwp.user_agent', 'netdisk;18.0.0.12;PC;bdwp')
         ]);
     }
 
