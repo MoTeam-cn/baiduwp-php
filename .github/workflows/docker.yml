@@ -18,9 +18,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Parse version from tag name
         run: echo "VERSION=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v\(.*\)/\1/p')" >> $GITHUB_ENV
+
+      - name: Generate release notes
+        run: |
+          echo "## 更新内容" > release_notes.md
+          echo "### 版本：v${{ env.VERSION }}" >> release_notes.md
+          echo "### 发布时间：$(date '+%Y-%m-%d')" >> release_notes.md
+          echo "### 提交者：${{ github.actor }}" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### 更新日志：" >> release_notes.md
+          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### 下载" >> release_notes.md
+          echo "- 源代码压缩包：baiduwp-php-v${{ env.VERSION }}.zip" >> release_notes.md
 
       - name: Pack source code
         run: zip -r baiduwp-php-v${{ env.VERSION }}.zip . -x ".git/*" ".github/*" ".gitignore"
@@ -33,7 +48,8 @@ jobs:
         with:
           tag_name: v${{ env.VERSION }}
           release_name: Release v${{ env.VERSION }}
-          draft: true
+          body_path: release_notes.md
+          draft: false
           prerelease: false
 
       - name: Upload Release Asset
