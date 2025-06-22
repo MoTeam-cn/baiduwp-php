@@ -1,4 +1,4 @@
-name: Build Docker Image & Pack Source Code
+name: Pack Source Code & Create Release
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: baiduwp-php
 
 jobs:
-  build_and_upload:
+  create_release:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,35 +22,8 @@ jobs:
       - name: Parse version from tag name
         run: echo "VERSION=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v\(.*\)/\1/p')" >> $GITHUB_ENV
 
-      - name: Build Docker image
-        run: docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}
-
-      - name: Log into Docker Hub
-        run: echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u yuantuo666 --password-stdin
-
-      - name: Push Docker image
-        run: |
-          IMAGE_ID=yuantuo666/$IMAGE_NAME
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          VERSION=${{ env.VERSION }}
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
-          [ "$VERSION" != "latest" ] && docker tag $IMAGE_NAME $IMAGE_ID:latest
-          [ "$VERSION" != "latest" ] && docker push $IMAGE_ID:latest
-
-      - name: Run Docker image
-        run: docker run -itd --name baiduwp-php ${{ env.IMAGE_NAME }}
-
-      - name: Install zip
-        run: docker exec baiduwp-php apt-get update && docker exec baiduwp-php apt-get install -y zip
-
       - name: Pack source code
-        run: docker exec baiduwp-php zip -r /tmp/baiduwp-php.zip /app
-
-      - name: Copy source code
-        run: docker cp baiduwp-php:/tmp/baiduwp-php.zip ./baiduwp-php-v${{ env.VERSION }}.zip
+        run: zip -r baiduwp-php-v${{ env.VERSION }}.zip . -x ".git/*" ".github/*" ".gitignore"
 
       - name: Create Release
         id: create_release
