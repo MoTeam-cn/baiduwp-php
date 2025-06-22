@@ -26,16 +26,19 @@ jobs:
 
       - name: Generate release notes
         run: |
-          echo "## 更新内容" > release_notes.md
-          echo "### 版本：v${{ env.VERSION }}" >> release_notes.md
-          echo "### 发布时间：$(date '+%Y-%m-%d')" >> release_notes.md
-          echo "### 提交者：${{ github.actor }}" >> release_notes.md
+          echo "# 🎉 Release v${{ env.VERSION }}" > release_notes.md
           echo "" >> release_notes.md
-          echo "### 更新日志：" >> release_notes.md
-          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s" >> release_notes.md
+          echo "## ℹ️ 发布信息" >> release_notes.md
+          echo "- 📦 版本：v${{ env.VERSION }}" >> release_notes.md
+          echo "- 📅 发布时间：$(date '+%Y-%m-%d')" >> release_notes.md
+          echo "- 👨‍💻 提交者：${{ github.actor }}" >> release_notes.md
           echo "" >> release_notes.md
-          echo "### 下载" >> release_notes.md
-          echo "- 源代码压缩包：baiduwp-php-v${{ env.VERSION }}.zip" >> release_notes.md
+          echo "## 🔄 更新内容" >> release_notes.md
+          echo "本次发布包含以下更改：" >> release_notes.md
+          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %h %s (%an)" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## 📥 下载" >> release_notes.md
+          echo "- 💾 源代码压缩包：[baiduwp-php-v${{ env.VERSION }}.zip](https://github.com/MoTeam-cn/baiduwp-php/releases/download/v${{ env.VERSION }}/baiduwp-php-v${{ env.VERSION }}.zip)" >> release_notes.md
 
       - name: Pack source code
         run: zip -r baiduwp-php-v${{ env.VERSION }}.zip . -x ".git/*" ".github/*" ".gitignore"
