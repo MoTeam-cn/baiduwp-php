@@ -85,7 +85,7 @@ class Install extends BaseController
         $user = $request->post('user', '');
         $pass = $request->post('pass', '');
         if ($driver == 'sqlite') {
-            $name = '.' . DIRECTORY_SEPARATOR . $name;
+            $name = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . $name;
         }
 
         $env = <<<EOF
@@ -104,7 +104,7 @@ DB_CHARSET = utf8
 
 DEFAULT_LANG = zh-cn
 EOF;
-        $envPath = '.' . DIRECTORY_SEPARATOR . '.env';
+        $envPath = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . '.env';
         file_put_contents($envPath, $env);
         if ($USING_DB == 'true') {
             try {

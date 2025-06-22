@@ -120,7 +120,7 @@ class Setting extends BaseController
 return {$config};
 PHP;
         try {
-            $configPath = '.' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'baiduwp.php';
+            $configPath = dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'baiduwp.php';
             if (!is_dir(dirname($configPath))) {
                 mkdir(dirname($configPath), 0755, true);
             }
