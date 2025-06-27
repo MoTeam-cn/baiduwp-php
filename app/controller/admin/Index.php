@@ -16,7 +16,7 @@ class Index extends BaseController
 
     public function index()
     {
-        return view('admin/index', [
+        return view('../admin/index', [
             'site_name' => config('baiduwp.site_name'),
             'program_version' => config('baiduwp.program_version'),
         ]);
@@ -36,7 +36,7 @@ class Index extends BaseController
         if (session('admin')) {
             return redirect('/admin');
         }
-        return view('admin/login', [
+        return view('../admin/login', [
             'site_name' => config('baiduwp.site_name'),
             'program_version' => config('baiduwp.program_version'),
         ]);

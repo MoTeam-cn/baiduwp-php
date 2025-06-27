@@ -92,8 +92,8 @@ class Parse
 					"fs_id" => number_format($file["fs_id"], 0, '', ''),
 					"size" => $file["size"],
 					"uploadtime" => $file["server_ctime"],
-					"md5" => $file["md5"],
-					"dlink" => $file["dlink"]
+					"md5" => $file["md5"] ?? '',
+					"dlink" => $file["dlink"] ?? ''
 				);
 			} else {
 				//文件夹
